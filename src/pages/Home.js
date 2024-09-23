@@ -1,27 +1,29 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-const HomePage = () => {
+const Home = () => {
   const { user, loading } = useContext(UserContext);
   const navigate = useNavigate();
   const cookie = Cookies.get('session_token');
-  console.log(cookie)
+  console.log(cookie);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/');  // Navigate to login if user is not authenticated
+    }
+  }, [loading, user, navigate]);
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>;  // Show loading state
   }
 
-  if (!user) {
-    navigate('/');
-    return null;
-  }
-  console.log(user)
   return (
     <div>
-      Welcome, {user.username}! {cookie}
+      Welcome, {user?.username}! {cookie}
     </div>
   );
 };
 
-export default HomePage;
+export default Home;

@@ -1,10 +1,14 @@
-import React, { createContext, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { UserContext } from '../context/UserContext';
+import { storage } from '../firebase.js';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import axios from 'axios';
+
 const Post = () => {
-    const [username, setUsername] = useState('');
     const [caption, setCaption] = useState('');
     const [file, setFile] = useState(null);
-    const fileLimit = 250000; 
+    const fileLimit = 25000000; // 25MB
+    const { user } = useContext(UserContext);
 
     const handleFileChange = (e) => {
         if (e.target.files[0].size > fileLimit) {
@@ -14,39 +18,58 @@ const Post = () => {
         setFile(e.target.files[0]);
     };
 
-    const handleDrop = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (e.dataTransfer.files[0].size > fileLimit) {
-            alert("File is over 25MB!");
+
+        if (!file || file.size > fileLimit) {
+            alert("Please select a valid file!");
             return;
         }
-        setFile(e.dataTransfer.files[0]);
+
+        const storageRef = ref(storage, `posts/${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                // You can show upload progress here if you want
+            },
+            (error) => {
+                alert("Error uploading file: ", error);
+            },
+            async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                console.log('File available at', downloadURL);
+
+                const postData = {
+                    username: user.username,
+                    profilePic: user.profilePic, 
+                    caption: caption,
+                    imageUrl: downloadURL
+                };
+
+                // Make a POST request to the backend
+                try {
+                    await axios.post('http://localhost:3500/api/posts', postData);
+                    alert("Post uploaded successfully!");
+                } catch (error) {
+                    console.error("Error uploading post: ", error);
+                }
+            }
+        );
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (file && file.size > fileLimit) {
-            alert("File is over 25MB!");
-            return;
-        }
-        console.log({ username, caption, file });
-    };
-    const user = createContext(UserContext);
     return (
-        <div className="max-w-lg mx-auto p-6 ml-52 bg-white shadow-lg rounded-lg">
+        <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Create a Post</h2>
             <form onSubmit={handleSubmit} onReset={() => setFile(null)} className="space-y-4">
                 <div className='place-items-center flex'>
-                   <img src = {user.dp} alt='profile pic'/>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                        {user.username}
-                    </label>
+                    <img src={user.profilePicture} alt='profile pic' className="w-12 h-12 rounded-full"/>
+                    <span className="ml-2 text-gray-700 font-medium">{user.username}</span>
                 </div>
 
                 <div
                     className="relative p-6 border-2 border-dashed border-gray-300 rounded-md text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleDrop}
                 >
                     <div className="flex justify-center items-center flex-col">
                         <svg
