@@ -1,27 +1,45 @@
-import React, { useContext, useEffect } from 'react';
-import { UserContext } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import PostCard from '../components/PostCard';
+import GoToPost from '../components/GoToPost';
 
 const Home = () => {
-  const { user, loading } = useContext(UserContext);
-  const navigate = useNavigate();
-  const cookie = Cookies.get('session_token');
-  console.log(cookie);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/');  // Navigate to login if user is not authenticated
-    }
-  }, [loading, user, navigate]);
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3500/api/getAllPosts');  
+        setPosts(response.data);
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   if (loading) {
-    return <div>Loading...</div>;  // Show loading state
+    return <div>Loading posts...</div>;
   }
 
   return (
-    <div>
-      Welcome, {user?.username}! {cookie}
+    <div className="ml-60">
+      <div >
+        <GoToPost/>
+      </div>
+      <div>
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard key={post._id} post={post} />
+          ))
+        ) : (
+          <div>No posts available</div>
+        )}
+      </div>
     </div>
   );
 };

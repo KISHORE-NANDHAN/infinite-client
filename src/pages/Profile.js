@@ -4,8 +4,9 @@ import Cropper from 'react-easy-crop';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import Card from '../components/Card'; // Import your Card component
+import Cookies from 'js-cookie'
 
-// Firebase storage setup
 const storage = getStorage();
 
 function Profile() {
@@ -20,13 +21,30 @@ function Profile() {
     bio: '',
     profilePicture: '',
   });
-
+  const [posts, setPosts] = useState([]); // State for posts
+  const [selectedPost, setSelectedPost] = useState(null); // State for selected post
+  const sessionToken = Cookies.get("session_token");
   useEffect(() => {
     if (user) {
       setUpdatedData(user);
+      fetchUserPosts();
     }
   }, [user]);
 
+  const fetchUserPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3500/getData/posts', {
+        params: { id: user._id }, // Send the user ID to fetch posts
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`, // Add your token if needed
+        },
+      });
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+    }
+  };
+  
   const handleCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
@@ -78,23 +96,39 @@ function Profile() {
     e.preventDefault();
     await uploadCroppedImage();
 
-    axios.put('http://localhost:3500/user-profile', updatedData)
-      .then(response => {
+    const userId = user._id; // Get the user ID from your user object
+
+    axios.put(`http://localhost:3500/ProfileUpdate/${userId}`, updatedData, {
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`, // Add your token in headers
+        },
+    })
+    .then(response => {
         setUser(response.data);
         setEditMode(false);
         alert('Profile updated successfully');
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         console.error('Error updating profile:', error);
         alert('Failed to update profile.');
-      });
-  };
+    });
+};
+
+
 
   const handleChange = (e) => {
     setUpdatedData({
       ...updatedData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPost(null);
   };
 
   if (loading) {
@@ -201,6 +235,37 @@ function Profile() {
         ) : (
           <div className="flex justify-center">
             <p className="text-lg">This is your profile. Edit it to make changes!</p>
+          </div>
+        )}
+
+        {/* Posts Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold">Your Posts</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+            {posts.map((post) => (
+              <img
+                key={post._id}
+                src={post.image}
+                alt={post.caption}
+                className="w-full h-64 object-cover rounded-lg cursor-pointer"
+                onClick={() => handlePostClick(post)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Modal for Selected Post */}
+        {selectedPost && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-4 rounded-lg max-w-lg h-auto w-full">
+              <Card post={selectedPost} />
+              <button
+                onClick={handleCloseModal}
+                className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
       </div>

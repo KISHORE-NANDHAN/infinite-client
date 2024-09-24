@@ -47,7 +47,7 @@ function Navbar() {
 
         {/* More Button */}
         <div
-          className="relative mb-8"
+          className="relative mb-12"
           onMouseEnter={() => setShowMore(true)}
           onMouseLeave={() => setShowMore(false)}
         >
@@ -63,9 +63,6 @@ function Navbar() {
               </li>
               <li className="hover:bg-gray-600 p-2 rounded-md">
                 <Link to="/app/update-user">Update User</Link>
-              </li>
-              <li className="hover:bg-gray-600 p-2 rounded-md">
-                <span>Dark Mode Toggle (Dummy)</span>
               </li>
             </ul>
           )}

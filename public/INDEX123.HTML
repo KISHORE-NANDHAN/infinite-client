@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzIA0b5lOdvYIq5vE+w+SioL+50t/R1hsIt0/Rv+hR17+X5uQ5X21+c" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+        }
+        .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+        .username {
+            font-weight: bold;
+        }
+        .tagline {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .post-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .post-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px;
+            gap: 15px;
+        }
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-icon {
+            width: 25px;
+            height: 25px;
+            color: #333;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .action-icon:hover {
+            transform: scale(1.2); /* Zoom effect on hover */
+        }
+        .action-icon.liked {
+            color: red;
+        }
+        .action-icon.comment-active {
+            color: #007bff;
+        }
+        .action-icon.share-active {
+            color: green;
+        }
+        .like-count, .share-count {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .post-info {
+            padding: 10px;
+        }
+        .views {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .caption {
+            font-weight: bold;
+        }
+        .hashtag {
+            color: #007bff;
+        }
+        .comments {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .time {
+            color: #6c757d;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        .popup {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 10px;
+            background-color: white;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 8px;
+            z-index: 100;
+        }
+        .popup div {
+            cursor: pointer;
+            padding: 5px;
+        }
+        .popup div:hover {
+            background-color: #f0f0f0;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+        .pop-effect {
+            animation: pop 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="profile-pic"></div>
+            <div>
+                <div class="username">username</div>
+                <div class="tagline">your tagline</div>
+            </div>
+            <span class="action-icon" id="menu-btn">...</span>
+            <div class="popup" id="popup">
+                <div id="delete-btn">Delete Post</div>
+            </div>
+        </div>
+        <img src="https://picsum.photos/id/237/400/300" alt="Instagram Post" class="post-image">
+        <div class="post-actions">
+            <div class="action-item">
+                <span class="action-icon" id="like-btn">♡</span>
+                <span class="like-count" id="like-count">0</span>
+            </div>
+            <div class="action-item">
+                <span class="action-icon" id="comment-btn">💬</span>
+                <span class="share-count" id="comment-count">0</span>
+            </div>
+            <div class="action-item">
+                <span class="action-icon" id="share-btn">📤</span>
+                <span class="share-count" id="share-count">0</span>
+            </div>
+        </div>
+        <div class="post-info">
+            <div class="views">10,222 views</div>
+            <div class="caption">Username instagram template <span class="hashtag">#tagline</span></div>
+            <div class="comments">View all 26 comments</div>
+            <div class="time">6 DAYS AGO</div>
+        </div>
+    </div>
+
+    <script>
+        let likeCount = 0;
+        let isLiked = false;
+        let commentCount = 0;
+        let isCommented = false;
+        let shareCount = 0;
+        let isShared = false;
+        let isPopupVisible = false;
+
+        // Like button functionality
+        document.getElementById('like-btn').addEventListener('click', function() {
+            isLiked = !isLiked; // Toggle like state
+            if (isLiked) {
+                likeCount++;
+                document.getElementById('like-btn').classList.add('liked', 'pop-effect'); // Animate and turn heart red
+            } else {
+                likeCount--;
+                document.getElementById('like-btn').classList.remove('liked'); // Revert heart color
+            }
+            document.getElementById('like-count').innerText = likeCount;
+        });
+
+        // Comment button functionality
+        document.getElementById('comment-btn').addEventListener('click', function() {
+            const comment = prompt("Enter your comment: ");
+            if (comment) {
+                commentCount++;
+                document.getElementById('comment-count').innerText = commentCount;
+                document.getElementById('comment-btn').classList.add('comment-active'); // Change color to indicate active state
+                alert(`Your comment: "${comment}" has been added!`);
+            }
+        });
+
+        // Share button functionality
+        document.getElementById('share-btn').addEventListener('click', function() {
+            shareCount++;
+            document.getElementById('share-btn').classList.add('share-active'); // Change color to indicate shared state
+            document.getElementById('share-count').innerText = shareCount;
+            alert("Post shared successfully!");
+        });
+
+        // Toggle popup visibility on ... click
+        document.getElementById('menu-btn').addEventListener('click', function() {
+            isPopupVisible = !isPopupVisible; // Toggle popup visibility
+            document.getElementById('popup').style.display = isPopupVisible ? 'block' : 'none';
+        });
+
+        // Delete button functionality with confirmation
+        document.getElementById('delete-btn').addEventListener('click', function() {
+            if (confirm("Are you sure you want to delete this post?")) {
+                alert("Post deleted!");
+                document.getElementById('popup').style.display = 'none'; // Hide popup after deletion
+                isPopupVisible = false;
+            }
+        });
+
+        // Hide popup when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.header')) {
+                document.getElementById('popup').style.display = 'none';
+                isPopupVisible = false;
+            }
+        });
+    </script>
+</body>
+</html>

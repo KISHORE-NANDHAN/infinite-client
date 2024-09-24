@@ -7,6 +7,7 @@ import axios from 'axios';
 const Post = () => {
     const [caption, setCaption] = useState('');
     const [file, setFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false); // New state for upload status
     const fileLimit = 25000000; // 25MB
     const { user } = useContext(UserContext);
 
@@ -28,6 +29,8 @@ const Post = () => {
 
         const storageRef = ref(storage, `posts/${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        setIsUploading(true); // Set uploading state to true
 
         uploadTask.on(
             "state_changed",
@@ -36,6 +39,7 @@ const Post = () => {
             },
             (error) => {
                 alert("Error uploading file: ", error);
+                setIsUploading(false); // Reset uploading state on error
             },
             async () => {
                 const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
@@ -54,6 +58,8 @@ const Post = () => {
                     alert("Post uploaded successfully!");
                 } catch (error) {
                     console.error("Error uploading post: ", error);
+                } finally {
+                    setIsUploading(false); // Reset uploading state after upload completes
                 }
             }
         );
@@ -64,7 +70,7 @@ const Post = () => {
             <h2 className="text-xl font-semibold mb-4">Create a Post</h2>
             <form onSubmit={handleSubmit} onReset={() => setFile(null)} className="space-y-4">
                 <div className='place-items-center flex'>
-                    <img src={user.profilePicture} alt='profile pic' className="w-12 h-12 rounded-full"/>
+                    <img src={user.profilePicture || process.env.REACT_APP_DEFAULT_PFP } alt='profile pic' className="w-12 h-12 rounded-full"/>
                     <span className="ml-2 text-gray-700 font-medium">{user.username}</span>
                 </div>
 
@@ -123,9 +129,10 @@ const Post = () => {
                     </button>
                     <button
                         type="submit"
-                        className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                        disabled={isUploading} // Disable the button when uploading
+                        className={`px-4 py-2 rounded-md ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                     >
-                        Save
+                        {isUploading ? 'Uploading...' : 'Save'} {/* Change button text */}
                     </button>
                 </div>
             </form>

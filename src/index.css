@@ -1,4 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-  
+
+.h-450px{
+    height: 450px;
+}

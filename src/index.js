@@ -5,7 +5,8 @@ import Signup from './pages/Signup.js';
 import Login from './pages/Login.js';
 import NotFound from './pages/NotFound.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { UserProvider } from './context/UserContext';  
+import { UserProvider } from './context/UserContext'; 
+import { PostProvider } from './context/PostContext';  
 import Logout from './pages/Logout.js'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -13,6 +14,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <UserProvider>
+      <PostProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -22,6 +24,7 @@ root.render(
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       </Router>
+      </PostProvider>
     </UserProvider>
   </React.StrictMode>
 );
