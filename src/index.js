@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound.js';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './context/UserContext'; 
 import { PostProvider } from './context/PostContext';  
+import { GetAllPostsProvider } from './context/GetAllPostsContext.js';  
 import Logout from './pages/Logout.js'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -15,6 +16,7 @@ root.render(
   <React.StrictMode>
     <UserProvider>
       <PostProvider>
+        <GetAllPostsProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -24,6 +26,7 @@ root.render(
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       </Router>
+      </GetAllPostsProvider>
       </PostProvider>
     </UserProvider>
   </React.StrictMode>

@@ -5,7 +5,7 @@ import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage"
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 import Card from '../components/Card'; // Import your Card component
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 
 const storage = getStorage();
 
@@ -24,6 +24,7 @@ function Profile() {
   const [posts, setPosts] = useState([]); // State for posts
   const [selectedPost, setSelectedPost] = useState(null); // State for selected post
   const sessionToken = Cookies.get("session_token");
+
   useEffect(() => {
     if (user) {
       setUpdatedData(user);
@@ -44,7 +45,7 @@ function Profile() {
       console.error('Error fetching user posts:', error);
     }
   };
-  
+
   const handleCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
@@ -99,22 +100,20 @@ function Profile() {
     const userId = user._id; // Get the user ID from your user object
 
     axios.put(`http://localhost:3500/ProfileUpdate/${userId}`, updatedData, {
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`, // Add your token in headers
-        },
+      headers: {
+        'Authorization': `Bearer ${sessionToken}`, // Add your token in headers
+      },
     })
     .then(response => {
-        setUser(response.data);
-        setEditMode(false);
-        alert('Profile updated successfully');
+      setUser(response.data);
+      setEditMode(false);
+      alert('Profile updated successfully');
     })
     .catch(error => {
-        console.error('Error updating profile:', error);
-        alert('Failed to update profile.');
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile.');
     });
-};
-
-
+  };
 
   const handleChange = (e) => {
     setUpdatedData({
@@ -140,8 +139,8 @@ function Profile() {
   }
 
   return (
-    <div className="flex ml-72 top-0 min-h-screen">
-      <div className="relative p-8 rounded-lg w-full max-w-6xl shadow-lg">
+    <div className="flex ml-0 lg:ml-72 top-0 min-h-screen p-4 lg:p-8">
+      <div className="relative p-4 lg:p-8 rounded-lg w-full max-w-6xl shadow-lg">
         <div className="absolute top-4 right-4">
           {!editMode && (
             <button
@@ -152,11 +151,11 @@ function Profile() {
             </button>
           )}
         </div>
-        <div className="flex items-center mb-8">
+        <div className="flex flex-col lg:flex-row items-center mb-8">
           <img
             src={user.profilePicture || 'https://via.placeholder.com/150'}
             alt="Profile"
-            className="w-40 h-40 rounded-full mr-8"
+            className="w-40 h-40 rounded-full mr-0 lg:mr-8 mb-4 lg:mb-0"
           />
           <div>
             <h1 className="text-4xl font-semibold">{user.username}</h1>

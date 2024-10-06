@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faSearch, faPlusSquare, faUserAlt, faBars } from '@fortawesome/free-solid-svg-icons'; // Import Font Awesome icons
+import { faHome, faSearch, faPlusSquare, faUserAlt, faBars } from '@fortawesome/free-solid-svg-icons';
 
 function Navbar() {
   const [showMore, setShowMore] = useState(false);
@@ -9,7 +9,7 @@ function Navbar() {
   return (
     <div>
       {/* Navbar for larger screens */}
-      <nav className="hidden sm:flex bg-gray-800 text-center text-white w-64 h-full p-6 flex-col justify-between items-center fixed">
+      <nav className="hidden sm:flex bg-gray-800 text-center text-white w-64 h-full p-6 flex-col justify-between items-center fixed top-0 left-0 z-50">
         {/* Logo */}
         <img 
           src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/logo.png?alt=media&token=da585e14-f4bd-4a00-ac98-cef73b6ccf54" 
@@ -57,7 +57,7 @@ function Navbar() {
           </button>
 
           {showMore && (
-            <ul className="absolute left-0 top-full mt-2 bg-gray-700 rounded-md shadow-lg space-y-2 w-40">
+            <ul className="absolute left-0 top-full mt-2 bg-gray-700 rounded-md shadow-lg space-y-2 w-40 z-50">
               <li className="hover:bg-gray-600 p-2 rounded-md">
                 <Link to="aboutus">About Us</Link>
               </li>
@@ -79,7 +79,7 @@ function Navbar() {
       </nav>
 
       {/* Navbar for mobile screens */}
-      <nav className="sm:hidden fixed bottom-0 w-full bg-gray-800 text-white p-2 flex justify-around">
+      <nav className="sm:hidden fixed bottom-0 w-full bg-gray-800 text-white p-2 flex justify-around z-50">
         <Link to="/app/home">
           <FontAwesomeIcon icon={faHome} className="text-2xl" />
         </Link>
@@ -97,7 +97,7 @@ function Navbar() {
         </button>
 
         {showMore && (
-          <div className="absolute bottom-full left-0 w-full bg-gray-800 p-4 space-y-2">
+          <div className="absolute bottom-full left-0 w-full bg-gray-800 p-4 space-y-2 z-50">
             <ul className="space-y-2 text-center">
               <li className="hover:bg-gray-600 p-2 rounded-md">
                 <Link to="aboutus">About Us</Link>

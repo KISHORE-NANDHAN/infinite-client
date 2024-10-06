@@ -9,7 +9,7 @@ function Card({ post }) {
             <div className="header flex items-center justify-between pb-2 border-b border-gray-300">
                 <div className="flex items-center">
                     <img
-                        src={user.ProfilePicture || 'default-profile-pic.png'} // Use a default image if none is provided
+                        src={user.ProfilePicture} // Use a default image if none is provided
                         alt="Profile"
                         className="w-8 h-8 bg-gray-300 rounded-full"
                     />

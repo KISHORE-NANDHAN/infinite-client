@@ -12,13 +12,12 @@ const GoToPost = () => {
     navigate('/app/post'); // Navigate to the desired path
   };
 
-  const username = user?.username || process.env.REACT_APP_DEFAULT_USER; // Fallback to 'Guest' if username is not available
-  const profilePicture = user?.ProfilePicture || process.env.REACT_DEFAULT_PFP; // Fallback to default profile picture
+  // Safe check to ensure user exists before accessing profilePicture
+  const profilePicture = user?.profilePicture || process.env.REACT_APP_DEFAULT_PFP; // Fallback to default profile picture
 
   return (
-    <div className="w-3/5 mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+    <div className="w-full sm:w-4/5 lg:w-3/5 mx-auto p-4 bg-gray-100 rounded-lg shadow-md">
       <div className="flex items-center mb-4">
-        <h1>{username}</h1>
         <img 
           src={profilePicture} 
           alt="Profile" 
