@@ -9,7 +9,7 @@ function Navbar() {
   return (
     <div>
       {/* Navbar for larger screens */}
-      <nav className="hidden sm:flex bg-gray-800 text-center text-white w-64 h-full p-6 flex-col justify-between items-center fixed top-0 left-0 z-50">
+      <nav className="hidden md:flex bg-gray-800 text-center text-white w-64 h-full p-6 flex-col justify-between items-center fixed top-0 left-0 z-50">
         {/* Logo */}
         <img 
           src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/logo.png?alt=media&token=da585e14-f4bd-4a00-ac98-cef73b6ccf54" 
@@ -79,7 +79,7 @@ function Navbar() {
       </nav>
 
       {/* Navbar for mobile screens */}
-      <nav className="sm:hidden fixed bottom-0 w-full bg-gray-800 text-white p-2 flex justify-around z-50">
+      <nav className="md:hidden fixed bottom-0 w-full bg-gray-800 text-white p-2 flex justify-around z-50">
         <Link to="/app/home">
           <FontAwesomeIcon icon={faHome} className="text-2xl" />
         </Link>

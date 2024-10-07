@@ -4,30 +4,32 @@ import Cropper from 'react-easy-crop';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
-import Card from '../components/Card';
 import Cookies from 'js-cookie';
-
+import Card from '../components/Card'
 const storage = getStorage();
 
 function Profile() {
-  const { user, setUser, loading } = useContext(UserContext);
+  const { user, setUser, loading: userLoading } = useContext(UserContext);
   const [editMode, setEditMode] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [updatedData, setUpdatedData] = useState({ // Initialize state with user data
+  const [updatedData, setUpdatedData] = useState({
     username: user?.username || '',
     bio: user?.bio || '',
     profilePicture: user?.profilePicture || '',
   });
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state for profile updates
+  const [imageUploading, setImageUploading] = useState(false); // Image uploading state
+
   const sessionToken = Cookies.get("session_token");
 
   useEffect(() => {
     if (user) {
-      setUpdatedData({ // Set updatedData when user changes
+      setUpdatedData({
         username: user.username,
         bio: user.bio,
         profilePicture: user.profilePicture,
@@ -64,12 +66,17 @@ function Profile() {
   };
 
   const uploadCroppedImage = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels || !imageSrc) return;
 
+    setImageUploading(true); // Set image uploading state
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const image = new Image();
     image.src = imageSrc;
+
+    await new Promise((resolve) => {
+      image.onload = resolve;
+    });
 
     canvas.width = croppedAreaPixels.width;
     canvas.height = croppedAreaPixels.height;
@@ -89,18 +96,36 @@ function Profile() {
     const base64CroppedImage = canvas.toDataURL();
 
     const storageRef = ref(storage, `profilePictures/${user.username}`);
-    await uploadString(storageRef, base64CroppedImage, 'data_url').then(async (snapshot) => {
+    try {
+      const snapshot = await uploadString(storageRef, base64CroppedImage, 'data_url');
       const downloadURL = await getDownloadURL(snapshot.ref);
+      // Update profile picture URL after getting it from Firebase
       setUpdatedData((prev) => ({ ...prev, profilePicture: downloadURL }));
-    });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setImageUploading(false); // Reset image uploading state
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await uploadCroppedImage();
+
+    setLoading(true); // Set loading state when starting profile update
+
+    // Ensure the cropped image is uploaded before updating the profile
+    if (imageSrc) {
+      await uploadCroppedImage();
+    }
+
+    // Wait for image uploading to finish before proceeding
+    if (imageUploading) {
+      alert("Please wait, image is still uploading.");
+      setLoading(false);
+      return;
+    }
 
     const userId = user._id;
-
     try {
       const response = await axios.put(`http://localhost:3500/ProfileUpdate/${userId}`, updatedData, {
         headers: {
@@ -118,6 +143,8 @@ function Profile() {
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile.');
+    } finally {
+      setLoading(false); // Reset loading state after update is complete
     }
   };
 
@@ -136,7 +163,7 @@ function Profile() {
     setSelectedPost(null);
   };
 
-  if (loading) {
+  if (userLoading) {
     return <div>Loading...</div>;
   }
 
@@ -224,9 +251,10 @@ function Profile() {
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full"
+                className={`bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full ${loading && 'opacity-50'}`}
+                disabled={loading}
               >
-                Save Changes
+                {loading ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 type="button"
