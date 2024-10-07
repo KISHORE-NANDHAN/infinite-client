@@ -70,7 +70,7 @@ const Post = () => {
             <h2 className="text-xl font-semibold mb-4">Create a Post</h2>
             <form onSubmit={handleSubmit} onReset={() => setFile(null)} className="space-y-4">
                 <div className='place-items-center flex'>
-                    <img src={user.ProfilePicture || process.env.REACT_APP_DEFAULT_PFP } alt='profile pic' className="w-12 h-12 rounded-full"/>
+                    <img src={user.profilePicture || process.env.REACT_APP_DEFAULT_PFP } alt='profile pic' className="w-12 h-12 rounded-full"/>
                     <span className="ml-2 text-gray-700 font-medium">{user.username}</span>
                 </div>
 

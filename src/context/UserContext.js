@@ -12,11 +12,10 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const sessionToken = Cookies.get('session_token');
-    
+
     if (sessionToken) {
       // Fetch user data with the token
-      axios.get('http://localhost:3500/getData/user',
-      { params : {id : sessionToken}})
+      axios.get('http://localhost:3500/getData/user', { params: { id: sessionToken } })
         .then(response => {
           console.log(response.data);
           setUser(response.data); 
@@ -33,8 +32,14 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
+  // Function to logout
+  const logout = () => {
+    Cookies.remove('session_token'); // Remove the cookie
+    setUser(null); // Clear user data
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, loading }}>
+    <UserContext.Provider value={{ user, setUser, loading, logout }}>
       {children}
     </UserContext.Provider>
   );

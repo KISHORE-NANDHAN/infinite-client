@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const PostCard = ({ post }) => {
   const [likeCount, setLikeCount] = useState(post.likes.length);
@@ -13,14 +14,17 @@ const PostCard = ({ post }) => {
   const popupRef = useRef();
   const dropdownRef = useRef();
 
+  // Get the session token from cookies
+  const userId = Cookies.get('session-token');
   // Fetch user details based on post.user (userId)
   useEffect(() => {
     if (post.user) {
       const fetchUserDetails = async () => {
         try {
-          const response = await axios.get(`http://localhost:3500/users/${post.user}`);
+          const response = await axios.get(`http://localhost:3500/api/users/${post.user}`);
+          console.log(response.data);
           setUserDetails(response.data);
-          setIsFollowing(response.data.isFollowing); // Example field for follow status
+          setIsFollowing(response.data.isFollowing); 
         } catch (error) {
           console.error("Failed to fetch user details:", error);
         }
@@ -57,9 +61,9 @@ const PostCard = ({ post }) => {
 
   const handleLike = async () => {
     try {
-      const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/like`, { userId: 'some-user-id' });
-      setIsLiked(!isLiked);
-      setLikeCount(response.data.likes.length);
+      const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/like`, { userId });
+      setIsLiked(!isLiked);  // Toggle the like state
+      setLikeCount(response.data.likes.length);  // Update the like count
     } catch (error) {
       console.error('Failed to like post:', error);
     }
@@ -69,11 +73,11 @@ const PostCard = ({ post }) => {
     e.preventDefault();
     try {
       const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/comment`, {
-        userId: 'some-user-id',
+        userId,
         username: userDetails?.name || 'User',
         text: comment
       });
-      setComments(response.data.comments);
+      setComments(response.data.comments);  // Update the comments list
       setComment('');  // Clear the comment input field
     } catch (error) {
       console.error('Failed to comment on post:', error);
@@ -82,8 +86,8 @@ const PostCard = ({ post }) => {
 
   const toggleFollow = async () => {
     try {
-      const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { userId: 'some-user-id' });
-      setIsFollowing(!isFollowing);
+      const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { userId });
+      setIsFollowing(!isFollowing);  // Toggle follow state
     } catch (error) {
       console.error("Failed to toggle follow:", error);
     }
@@ -91,7 +95,7 @@ const PostCard = ({ post }) => {
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = post.image; // Assuming image URL is in post.image
+    link.href = post.image;  // Assuming image URL is in post.image
     link.download = `${userDetails?.name || 'post'}-image.jpg`;
     link.click();
   };
@@ -107,7 +111,7 @@ const PostCard = ({ post }) => {
             className="profile-pic w-8 h-8 rounded-full"
           />
           <div className="ml-2">
-            <div className="username font-bold">{userDetails?.name || 'Loading...'}</div>
+            <div className="username font-bold">{userDetails?.username || 'Loading...'}</div>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -169,6 +173,7 @@ const PostCard = ({ post }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div ref={popupRef} className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative flex">
             {/* Post Section */}
+            
             <div className="w-1/2">
               <img
                 src={post.image}
@@ -185,44 +190,39 @@ const PostCard = ({ post }) => {
 
             {/* Comment Section */}
             <div className="w-1/2 pl-6">
-              <h3 className="text-lg font-semibold mb-4">Comments</h3>
-              <div className="comment-list space-y-4 h-64 overflow-y-auto">
-                {comments.map((comment, idx) => (
-                  <div key={idx} className="comment-item flex items-start">
-                    <img
-                      src={comment.user.profilePicture || '/default-profile.png'}
-                      alt="User"
-                      className="w-6 h-6 rounded-full mr-2"
-                    />
-                    <div>
-                      <div className="comment-user font-semibold">{comment.username}</div>
-                      <div className="comment-text text-sm">{comment.text}</div>
+              <h3 className="text-lg font-semibold mb-2">Comments</h3>
+              <div className="comment-section max-h-64 overflow-auto mb-4">
+                {comments.length === 0 ? (
+                  <p>No comments yet. Be the first to comment!</p>
+                ) : (
+                  comments.map((comment, index) => (
+                    <div key={index} className="comment-item mb-2">
+                      <p className="font-semibold">{comment.username}</p>
+                      <p>{comment.text}</p>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
-              {/* Comment Form */}
-              <form onSubmit={handleCommentSubmit} className="comment-form mt-4 flex items-center space-x-2">
+              <form onSubmit={handleCommentSubmit} className="comment-form flex items-center">
                 <input
                   type="text"
-                  className="w-full border border-gray-300 rounded-lg p-2"
                   placeholder="Add a comment..."
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
+                  className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none"
                 />
-                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+                <button type="submit" className="p-2 bg-blue-500 text-white rounded-r-lg">
                   Post
                 </button>
               </form>
             </div>
-
             {/* Close Button */}
             <button
+              className="absolute top-2 right-2 p-2 text-xl text-gray-600 hover:bg-gray-200 rounded-full"
               onClick={() => setIsCommentPopupOpen(false)}
-              className="absolute top-4 right-4 text-2xl text-gray-600"
             >
-              &times;
+              ×
             </button>
           </div>
         </div>

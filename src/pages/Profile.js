@@ -4,7 +4,7 @@ import Cropper from 'react-easy-crop';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
-import Card from '../components/Card'; // Import your Card component
+import Card from '../components/Card';
 import Cookies from 'js-cookie';
 
 const storage = getStorage();
@@ -16,18 +16,22 @@ function Profile() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [updatedData, setUpdatedData] = useState({
-    username: '',
-    bio: '',
-    profilePicture: '',
+  const [updatedData, setUpdatedData] = useState({ // Initialize state with user data
+    username: user?.username || '',
+    bio: user?.bio || '',
+    profilePicture: user?.profilePicture || '',
   });
-  const [posts, setPosts] = useState([]); // State for posts
-  const [selectedPost, setSelectedPost] = useState(null); // State for selected post
+  const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
   const sessionToken = Cookies.get("session_token");
 
   useEffect(() => {
     if (user) {
-      setUpdatedData(user);
+      setUpdatedData({ // Set updatedData when user changes
+        username: user.username,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      });
       fetchUserPosts();
     }
   }, [user]);
@@ -35,9 +39,9 @@ function Profile() {
   const fetchUserPosts = async () => {
     try {
       const response = await axios.get('http://localhost:3500/getData/posts', {
-        params: { id: user._id }, // Send the user ID to fetch posts
+        params: { id: user._id },
         headers: {
-          'Authorization': `Bearer ${sessionToken}`, // Add your token if needed
+          'Authorization': `Bearer ${sessionToken}`,
         },
       });
       setPosts(response.data);
@@ -60,6 +64,8 @@ function Profile() {
   };
 
   const uploadCroppedImage = async () => {
+    if (!croppedAreaPixels) return;
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const image = new Image();
@@ -85,11 +91,7 @@ function Profile() {
     const storageRef = ref(storage, `profilePictures/${user.username}`);
     await uploadString(storageRef, base64CroppedImage, 'data_url').then(async (snapshot) => {
       const downloadURL = await getDownloadURL(snapshot.ref);
-      setUpdatedData({
-        ...updatedData,
-        profilePicture: downloadURL,
-      });
-      console.log('Uploaded a cropped image and got the URL:', downloadURL);
+      setUpdatedData((prev) => ({ ...prev, profilePicture: downloadURL }));
     });
   };
 
@@ -97,22 +99,26 @@ function Profile() {
     e.preventDefault();
     await uploadCroppedImage();
 
-    const userId = user._id; // Get the user ID from your user object
+    const userId = user._id;
 
-    axios.put(`http://localhost:3500/ProfileUpdate/${userId}`, updatedData, {
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`, // Add your token in headers
-      },
-    })
-    .then(response => {
-      setUser(response.data);
+    try {
+      const response = await axios.put(`http://localhost:3500/ProfileUpdate/${userId}`, updatedData, {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
+      setUser(response.data); // Update user context with new data
+      setUpdatedData({
+        username: response.data.username,
+        bio: response.data.bio,
+        profilePicture: response.data.profilePicture,
+      });
       setEditMode(false);
       alert('Profile updated successfully');
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile.');
-    });
+    }
   };
 
   const handleChange = (e) => {
@@ -153,13 +159,13 @@ function Profile() {
         </div>
         <div className="flex flex-col lg:flex-row items-center mb-8">
           <img
-            src={user.profilePicture || 'https://via.placeholder.com/150'}
+            src={updatedData.profilePicture || 'https://via.placeholder.com/150'}
             alt="Profile"
             className="w-40 h-40 rounded-full mr-0 lg:mr-8 mb-4 lg:mb-0"
           />
           <div>
-            <h1 className="text-4xl font-semibold">{user.username}</h1>
-            <p className="text-gray-600 text-lg mt-2">{user.bio}</p>
+            <h1 className="text-4xl font-semibold">{updatedData.username}</h1>
+            <p className="text-gray-600 text-lg mt-2">{updatedData.bio}</p>
             <div className="flex mt-2">
               <div className="mr-4">
                 <p><strong>Followers:</strong> {user.followers.length}</p>
@@ -237,7 +243,6 @@ function Profile() {
           </div>
         )}
 
-        {/* Posts Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-semibold">Your Posts</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
@@ -253,7 +258,6 @@ function Profile() {
           </div>
         </div>
 
-        {/* Modal for Selected Post */}
         {selectedPost && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg max-w-lg h-auto w-full">

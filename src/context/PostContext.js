@@ -10,7 +10,7 @@ export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const sessionToken = Cookies.get("session_token");
+  const sessionToken = Cookies.get('session_token');
 
   useEffect(() => {
     if (!sessionToken) {
@@ -38,15 +38,21 @@ export const PostProvider = ({ children }) => {
       const response = await axios.post('http://localhost:3500/createPost', newPost, {
         headers: { Authorization: `Bearer ${sessionToken}` },
       });
-      setPosts((prevPosts) => [...prevPosts, response.data]);
+      setPosts(prevPosts => [...prevPosts, response.data]);
     } catch (err) {
       console.error('Error adding post:', err);
       setError('Failed to add post');
     }
   };
 
+  const logout = () => {
+    Cookies.remove('session_token'); // Clear the cookie
+    setPosts([]); // Clear the posts on logout
+    setError(null); // Clear any errors
+  };
+
   return (
-    <PostContext.Provider value={{ posts, loading, error, setPosts, addPost }}>
+    <PostContext.Provider value={{ posts, loading, error, setPosts, addPost, logout }}>
       {children}
     </PostContext.Provider>
   );
