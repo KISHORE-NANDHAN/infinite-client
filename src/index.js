@@ -8,7 +8,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './context/UserContext'; 
 import { PostProvider } from './context/PostContext';  
 import { GetAllPostsProvider } from './context/GetAllPostsContext.js';  
+import Bot from './Bot.js'
 import Logout from './pages/Logout.js'
+import AboutUs from './pages/AboutUs.js'
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -23,6 +26,8 @@ root.render(
           <Route path="/signup" element={<Signup />} />
           <Route path="/app/*" element={<App />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="/bot" element={<Bot />} />
+          <Route path="/aboutus" element={<AboutUs />} />
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       </Router>

@@ -59,7 +59,7 @@ function Navbar() {
           {showMore && (
             <ul className="absolute left-0 top-full mt-2 bg-gray-700 rounded-md shadow-lg space-y-2 w-40 z-50">
               <li className="hover:bg-gray-600 p-2 rounded-md">
-                <Link to="aboutus">About Us</Link>
+                <Link to="/aboutus">About Us</Link>
               </li>
               <li className="hover:bg-gray-600 p-2 rounded-md">
                 <Link to="/app/update-user">Update User</Link>
@@ -100,7 +100,7 @@ function Navbar() {
           <div className="absolute bottom-full left-0 w-full bg-gray-800 p-4 space-y-2 z-50">
             <ul className="space-y-2 text-center">
               <li className="hover:bg-gray-600 p-2 rounded-md">
-                <Link to="aboutus">About Us</Link>
+                <Link to="/aboutus">About Us</Link>
               </li>
               <li className="hover:bg-gray-600 p-2 rounded-md">
                 <Link to="/app/update-user">Update User</Link>

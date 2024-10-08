@@ -69,7 +69,6 @@ function Signup() {
       return 'Weak';
     }
   };
-  
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white-100">
@@ -109,8 +108,6 @@ function Signup() {
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded"
               name="dob"
-              min='31-12-1950'
-              max='31-12-2015'
               required
             />
           </div>
@@ -163,7 +160,6 @@ function Signup() {
             </p>
           </div>
           <div className="col-span-2 text-center">
-            
             <button
               type="submit"
               className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -175,7 +171,7 @@ function Signup() {
             </p>
           </div>
         </form>
-        <div className="mt-8 flex flex-row space-x-4">
+        <div className="mt-8 flex flex-row justify-center space-x-4">
           <button className="w-10 h-10 rounded bg-white-100 shadow">
             <img src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/icons8-google.svg?alt=media&token=a6c9dd7d-35c7-45e1-845f-a1810a19636e" alt="google" />
           </button>
@@ -187,7 +183,7 @@ function Signup() {
           </button>
         </div>
       </div>
-      <div className="w-full md:w-6/12 h-max md:mt-0">
+      <div className="hidden md:block w-full md:w-6/12 h-max md:mt-0">
         <img src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/signup.png?alt=media&token=be905e98-9d11-4bcd-b3f9-cba04acf7f07" className='mt-24' alt="illustration for signup" />
       </div>
     </div>

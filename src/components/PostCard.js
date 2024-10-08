@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Toast from '../components/Toast'
 
 const PostCard = ({ post }) => {
   const [likeCount, setLikeCount] = useState(post.likes.length);
@@ -11,27 +12,37 @@ const PostCard = ({ post }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentPopupOpen, setIsCommentPopupOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
   const popupRef = useRef();
   const dropdownRef = useRef();
 
-  // Get the session token from cookies
-  const userId = Cookies.get('session-token');
+  // Get the session token from cookies (representing the current logged-in user)
+  const currentUserId = Cookies.get('session_token');
+
   // Fetch user details based on post.user (userId)
   useEffect(() => {
     if (post.user) {
       const fetchUserDetails = async () => {
         try {
           const response = await axios.get(`http://localhost:3500/api/users/${post.user}`);
-          console.log(response.data);
           setUserDetails(response.data);
-          setIsFollowing(response.data.isFollowing); 
+          setIsFollowing(response.data.followers.includes(currentUserId));  // Set follow state
         } catch (error) {
           console.error("Failed to fetch user details:", error);
         }
       };
       fetchUserDetails();
     }
-  }, [post.user]);
+  }, [post.user, currentUserId]);
+
+  // Toast visibility effect
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(''), 3000); // Clear toast after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Close popup when clicked outside
   useEffect(() => {
@@ -61,9 +72,9 @@ const PostCard = ({ post }) => {
 
   const handleLike = async () => {
     try {
-      const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/like`, { userId });
-      setIsLiked(!isLiked);  // Toggle the like state
-      setLikeCount(response.data.likes.length);  // Update the like count
+      const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/like`,{ currentUserId} );
+      setIsLiked(!isLiked); 
+      setLikeCount(response.data.likes.length); 
     } catch (error) {
       console.error('Failed to like post:', error);
     }
@@ -72,36 +83,46 @@ const PostCard = ({ post }) => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/comment`, {
-        userId,
-        username: userDetails?.name || 'User',
-        text: comment
-      });
-      setComments(response.data.comments);  // Update the comments list
-      setComment('');  // Clear the comment input field
+        const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/comment`, {
+            pfp: userDetails.profilePicture || process.env.REACT_APP_DEFAULT_PFP,
+            userId: currentUserId,
+            username: userDetails?.username || 'Infinite_User',
+            text: comment
+        });
+        setComments(response.data.comments);// Update the comments list
+        setComment('');  // Clear the comment input field
     } catch (error) {
-      console.error('Failed to comment on post:', error);
+        console.error('Failed to comment on post:', error);
     }
-  };
+};
+
 
   const toggleFollow = async () => {
     try {
-      const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { userId });
-      setIsFollowing(!isFollowing);  // Toggle follow state
+      const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { currentUserId });
+
+      if (response.data.message === 'User followed successfully') {
+        setToastMessage(`you have successfully followed ${userDetails.username}`);
+        setToastType('success');
+      } else if (response.data.message === 'User unfollowed successfully') {
+        setToastMessage(`you have successfully unfollowed ${userDetails.username}`);
+        setToastType('success');
+      } else if (response.data.message === 'You cannot follow yourself') {
+        setToastMessage("Can't follow or unfollow yourself");
+        setToastType('error');
+      }
+
+      setIsFollowing(!isFollowing); 
     } catch (error) {
       console.error("Failed to toggle follow:", error);
     }
   };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = post.image;  // Assuming image URL is in post.image
-    link.download = `${userDetails?.name || 'post'}-image.jpg`;
-    link.click();
-  };
-
   return (
     <div className="max-w-[531px] overflow-hidden mx-auto p-4 bg-white rounded-lg shadow-md relative">
+      {/* Toast Notification */}
+      {toastMessage && <Toast message={toastMessage} type={toastType} />}
+
       {/* Header Section */}
       <div className="header flex items-center justify-between pb-2 border-b border-gray-300">
         <div className="flex items-center">
@@ -173,7 +194,6 @@ const PostCard = ({ post }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div ref={popupRef} className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative flex">
             {/* Post Section */}
-            
             <div className="w-1/2">
               <img
                 src={post.image}
@@ -191,39 +211,27 @@ const PostCard = ({ post }) => {
             {/* Comment Section */}
             <div className="w-1/2 pl-6">
               <h3 className="text-lg font-semibold mb-2">Comments</h3>
-              <div className="comment-section max-h-64 overflow-auto mb-4">
-                {comments.length === 0 ? (
-                  <p>No comments yet. Be the first to comment!</p>
-                ) : (
-                  comments.map((comment, index) => (
-                    <div key={index} className="comment-item mb-2">
-                      <p className="font-semibold">{comment.username}</p>
-                      <p>{comment.text}</p>
-                    </div>
-                  ))
-                )}
+              <div className="comments max-h-60 overflow-y-auto mb-4">
+                {comments.map((comment, index) => (
+                  <div key={index} className="comment py-2 border-b border-gray-200">
+                    <strong>{comment.username}</strong>: {comment.text}
+                  </div>
+                ))}
               </div>
-
-              <form onSubmit={handleCommentSubmit} className="comment-form flex items-center">
+              <form onSubmit={handleCommentSubmit} className="flex">
                 <input
                   type="text"
-                  placeholder="Add a comment..."
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none"
+                  className="flex-grow border border-gray-300 rounded-lg p-2 mr-2"
+                  placeholder="Add a comment..."
                 />
-                <button type="submit" className="p-2 bg-blue-500 text-white rounded-r-lg">
-                  Post
-                </button>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">Post</button>
               </form>
             </div>
+
             {/* Close Button */}
-            <button
-              className="absolute top-2 right-2 p-2 text-xl text-gray-600 hover:bg-gray-200 rounded-full"
-              onClick={() => setIsCommentPopupOpen(false)}
-            >
-              ×
-            </button>
+            <button onClick={() => setIsCommentPopupOpen(false)} className="absolute top-2 right-2 text-xl text-gray-600">✖</button>
           </div>
         </div>
       )}

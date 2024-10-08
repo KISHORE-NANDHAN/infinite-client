@@ -5,3 +5,8 @@
 .h-450px{
     height: 450px;
 }
+.toast {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0.9;
+  }
+  

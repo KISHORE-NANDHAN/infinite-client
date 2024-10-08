@@ -9,7 +9,7 @@ const Home = () => {
   if (loading) {
     return <div>Loading posts...</div>;
   }
-
+  
   return (
     <div className="flex overflow-hidden flex-col md:flex-row object-cover">
       <div className="flex-grow md:ml-60">
