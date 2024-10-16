@@ -14,7 +14,7 @@ export const GetAllPostsProvider = ({ children }) => {
       try {
         const today = new Date();
         const lastWeek = new Date();
-        lastWeek.setDate(today.getDate() - 7);
+        lastWeek.setDate(today.getDate() - 30);
 
         const todayString = today.toISOString().split('T')[0];
         const lastWeekString = lastWeek.toISOString().split('T')[0];
