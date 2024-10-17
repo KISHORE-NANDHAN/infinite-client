@@ -7,8 +7,9 @@ export const UserContext = createContext();
 
 // Create a provider component
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);  // Store user data
+  const [user, setUser] = useState(null); // Store user data
   const [loading, setLoading] = useState(true); // Loading state
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const sessionToken = Cookies.get('session_token');
@@ -17,18 +18,19 @@ export const UserProvider = ({ children }) => {
       // Fetch user data with the token
       axios.get('http://localhost:3500/getData/user', { params: { id: sessionToken } })
         .then(response => {
-          console.log(response.data);
+          console.log(response.data); // Debugging: Check response
           setUser(response.data); 
+          setCurrentUser(response.data);
         })
         .catch(error => {
           console.error('Error fetching user data:', error);
           setUser(null);  
         })
         .finally(() => {
-          setLoading(false); 
+          setLoading(false); // Loading finished
         });
     } else {
-      setLoading(false);
+      setLoading(false); // No token, loading finished
     }
   }, []);
 
@@ -39,7 +41,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading, logout }}>
+    <UserContext.Provider value={{ user, setUser,currentUser,setCurrentUser, loading, logout }}>
       {children}
     </UserContext.Provider>
   );

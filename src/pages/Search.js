@@ -50,8 +50,8 @@ function Search() {
   };
 
   const handleUserSelect = (user) => {
-    // Navigate to the user's profile directly when a user is selected from the filtered list
-    navigate(`/app/OthersProfile`, { state: { user } });
+    // Navigate to the user's profile, sending the selected user data in the state
+    navigate(`/app/OthersProfile/${user._id}`, { state: { user } });
   };
 
   const handleSearch = (e) => {
@@ -59,7 +59,7 @@ function Search() {
     // Check if there's an exact match in the filtered users
     const selectedUser = filteredUsers.find((user) => user.username.toLowerCase() === searchValue.toLowerCase());
     if (selectedUser) {
-      navigate(`/app/OthersProfile`, { state: { user: selectedUser } });
+      navigate(`/app/OthersProfile/${selectedUser._id}`, { state: { user: selectedUser } });
     } else {
       setToastMessage('User not found!');
       setToastType('error'); // Set toast type to error

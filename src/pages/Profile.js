@@ -162,6 +162,9 @@ function Profile() {
   const handleCloseModal = () => {
     setSelectedPost(null);
   };
+  const handleDeletePost = (postId) =>{
+    setPosts(posts.filter(post => post._id !== postId));
+  }
 
   if (userLoading) {
     return <div>Loading...</div>;
@@ -289,13 +292,8 @@ function Profile() {
         {selectedPost && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg max-w-lg h-auto w-full">
-              <Card post={selectedPost} />
-              <button
-                onClick={handleCloseModal}
-                className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-              >
-                Close
-              </button>
+              <Card post={selectedPost} onDelete={handleDeletePost} onClose={handleCloseModal} />
+              {handleCloseModal}
             </div>
           </div>
         )}

@@ -6,6 +6,10 @@ import { faHome, faSearch, faPlusSquare, faUserAlt, faBars } from '@fortawesome/
 function Navbar() {
   const [showMore, setShowMore] = useState(false);
 
+  const toggleShowMore = () => {
+    setShowMore((prev) => !prev);
+  };
+
   return (
     <div>
       {/* Navbar for larger screens */}
@@ -46,12 +50,11 @@ function Navbar() {
         </ul>
 
         {/* More Button */}
-        <div
-          className="relative mb-12"
-          onMouseEnter={() => setShowMore(true)}
-          onMouseLeave={() => setShowMore(false)}
-        >
-          <button className="flex items-center justify-center space-x-2 w-full">
+        <div className="relative mb-12">
+          <button 
+            className="flex items-center justify-center space-x-2 w-full"
+            onClick={toggleShowMore}
+          >
             <FontAwesomeIcon icon={faBars} className="text-xl" />
             <span className="hidden sm:block">More</span>
           </button>
@@ -92,7 +95,7 @@ function Navbar() {
         <Link to="/app/profile">
           <FontAwesomeIcon icon={faUserAlt} className="text-2xl" />
         </Link>
-        <button onClick={() => setShowMore(!showMore)}>
+        <button onClick={toggleShowMore}>
           <FontAwesomeIcon icon={faBars} className="text-2xl" />
         </button>
 
