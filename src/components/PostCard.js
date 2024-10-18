@@ -75,6 +75,13 @@ const PostCard = ({ post }) => {
       const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/like`,{ currentUserId} );
       setIsLiked(!isLiked); 
       setLikeCount(response.data.likes.length); 
+      sendLikeNotification()
+        .then(() => {
+          console.log('Notification sent successfully');
+        })
+        .catch((error) => {
+          console.error('Failed to send notification:', error);
+        });
     } catch (error) {
       console.error('Failed to like post:', error);
     }
@@ -91,32 +98,99 @@ const PostCard = ({ post }) => {
         });
         setComments(response.data.comments);// Update the comments list
         setComment('');  // Clear the comment input field
+        sendCommentNotification()
+        .then(() => {
+          console.log('Notification sent successfully');
+        })
+        .catch((error) => {
+          console.error('Failed to send notification:', error);
+        });
     } catch (error) {
         console.error('Failed to comment on post:', error);
     }
 };
+const sendLikeNotification = () => {
+  axios
+    .post(`http://localhost:3500/api/notifications`, {
+      type: 'like',
+      actionUserId: currentUserId,  // The user who liked
+      userId: post.user,  // The user who owns the post
+      postId: post._id  // The post that was liked, passing the post ID here
+    })
+    .then(() => {
+      console.log('Like notification sent successfully');
+    })
+    .catch((error) => {
+      console.error('Failed to send like notification:', error);
+    });
+};
+// Function to send comment notification
+const sendCommentNotification = () => {
+  axios
+    .post(`http://localhost:3500/api/notifications`, {
+      type: 'comment',
+      actionUserId: currentUserId,  // The user who commented
+      userId: post.user,  // The user who owns the post
+      postId: post._id  // The post that was commented on, passing the post ID here
+    })
+    .then(() => {
+      console.log('Comment notification sent successfully');
+    })
+    .catch((error) => {
+      console.error('Failed to send comment notification:', error);
+    });
+};
+
+const sendFollowNotification = () => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`http://localhost:3500/api/notifications`, {
+        type: 'follow',
+        actionUserId: currentUserId, 
+        userId: post.user, 
+        postId: null 
+      })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
 
 
-  const toggleFollow = async () => {
-    try {
-      const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { currentUserId });
 
-      if (response.data.message === 'User followed successfully') {
-        setToastMessage(`you have successfully followed ${userDetails.username}`);
-        setToastType('success');
-      } else if (response.data.message === 'User unfollowed successfully') {
-        setToastMessage(`you have successfully unfollowed ${userDetails.username}`);
-        setToastType('success');
-      } else if (response.data.message === 'You cannot follow yourself') {
-        setToastMessage("Can't follow or unfollow yourself");
-        setToastType('error');
-      }
+const toggleFollow = async () => {
+  try {
+    const response = await axios.post(`http://localhost:3500/api/users/${post.user}/follow`, { currentUserId });
 
-      setIsFollowing(!isFollowing); 
-    } catch (error) {
-      console.error("Failed to toggle follow:", error);
+    if (response.data.message === 'User followed successfully') {
+      setToastMessage(`You have successfully followed ${userDetails.username}`);
+      setToastType('success');
+
+      // Send follow notification as a promise
+      sendFollowNotification()
+        .then(() => {
+          console.log('Notification sent successfully');
+        })
+        .catch((error) => {
+          console.error('Failed to send notification:', error);
+        });
+    } else if (response.data.message === 'User unfollowed successfully') {
+      setToastMessage(`You have successfully unfollowed ${userDetails.username}`);
+      setToastType('success');
+    } else if (response.data.message === 'You cannot follow yourself') {
+      setToastMessage("Can't follow or unfollow yourself");
+      setToastType('error');
     }
-  };
+
+    setIsFollowing(!isFollowing); 
+  } catch (error) {
+    console.error("Failed to toggle follow:", error);
+  }
+};
+
 
   return (
     <div className="max-w-[531px] overflow-hidden mx-auto p-4 bg-white rounded-lg shadow-md relative">
@@ -195,6 +269,16 @@ const PostCard = ({ post }) => {
           <div ref={popupRef} className="bg-white rounded-lg w-11/12 max-w-4xl p-6 relative flex">
             {/* Post Section */}
             <div className="w-1/2">
+              <div className="flex items-center">
+                <img
+                  src={userDetails.profilePicture || '/default-profile.png'}
+                  alt="Profile"
+                  className="w-8 h-8 bg-gray-300 rounded-full"
+                />
+                <div className="ml-2">
+                  <div className="username font-bold">{userDetails.username || 'Anonymous'}</div>
+                </div>
+              </div>
               <img
                 src={post.image}
                 alt="Post"
