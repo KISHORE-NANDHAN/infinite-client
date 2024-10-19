@@ -57,6 +57,10 @@ function Enter() {
             imgSrc="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/github-icon.png?alt=media&token=09ea7473-9dd6-4d44-b957-694742740d58"
             techName="GitHub"
           />
+          <TechnologyCard
+            imgSrc="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/Untitled.png?alt=media&token=f97f08b8-d4c0-42e9-b36a-6f9f89fd8966"
+            techName="Firebase"
+          />
         </div>
       </section>
 

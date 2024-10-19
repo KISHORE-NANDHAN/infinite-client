@@ -68,7 +68,7 @@ function Profile() {
   const uploadCroppedImage = async () => {
     if (!croppedAreaPixels || !imageSrc) return;
 
-    setImageUploading(true); // Set image uploading state
+    setImageUploading(true); 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const image = new Image();
@@ -144,7 +144,7 @@ function Profile() {
       console.error('Error updating profile:', error);
       alert('Failed to update profile.');
     } finally {
-      setLoading(false); // Reset loading state after update is complete
+      setLoading(false); 
     }
   };
 

@@ -11,6 +11,7 @@ import { GetAllPostsProvider } from './context/GetAllPostsContext.js';
 import Bot from './Bot.js'
 import Logout from './pages/Logout.js'
 import AboutUs from './pages/AboutUs.js'
+import { DarkModeProvider } from './context/DarkModeContext.js';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -20,18 +21,20 @@ root.render(
     <UserProvider>
       <PostProvider>
         <GetAllPostsProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/app/*" element={<App />} />
-          <Route path="/logout" element={<Logout />} />
-          <Route path="/bot" element={<Bot />} />
-          <Route path="/aboutus" element={<AboutUs />} />
-          <Route path="*" element={<NotFound />} /> 
-        </Routes>
-      </Router>
-      </GetAllPostsProvider>
+          <DarkModeProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/app/*" element={<App />} />
+                <Route path="/logout" element={<Logout />} />
+                <Route path="/bot" element={<Bot />} />
+                <Route path="/aboutus" element={<AboutUs />} />
+                <Route path="*" element={<NotFound />} /> 
+              </Routes>
+            </Router>
+          </DarkModeProvider>
+        </GetAllPostsProvider>
       </PostProvider>
     </UserProvider>
   </React.StrictMode>

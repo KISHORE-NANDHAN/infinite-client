@@ -51,8 +51,8 @@ function Card({ post, onDelete, onClose }) {
             await axios.delete(`http://localhost:3500/api/posts/${post._id}`).then((response)=>{
                 if(response.data.message==='Post deleted')
                     onDelete(post._id);
-            })
-            setShowDeleteMenu(false);
+                    setShowDeleteMenu(false);
+            });
         } catch (error) {
             console.error('Failed to delete post:', error);
             alert('Failed to delete post. Please try again.');

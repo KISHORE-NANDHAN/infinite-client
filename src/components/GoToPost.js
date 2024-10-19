@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faCalendarAlt, faNewspaper } from '@fortawesome/free-solid-svg-icons';
 import { UserContext } from '../context/UserContext';
@@ -18,11 +18,13 @@ const GoToPost = () => {
   return (
     <div className="w-full sm:w-4/5 lg:w-3/5 mx-auto p-4 bg-gray-100 rounded-lg shadow-md">
       <div className="flex items-center mb-4">
+        <a href='/app/profile' >
         <img 
           src={profilePicture} 
           alt="Profile" 
           className="w-10 h-10 mr-3 rounded-full" 
         />
+        </a>
         <input
           type="text"
           className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none cursor-pointer"

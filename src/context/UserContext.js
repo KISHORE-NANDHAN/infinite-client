@@ -18,26 +18,28 @@ export const UserProvider = ({ children }) => {
       // Fetch user data with the token
       axios.get('http://localhost:3500/getData/user', { params: { id: sessionToken } })
         .then(response => {
-          console.log(response.data); // Debugging: Check response
+          console.log(response.data); 
           setUser(response.data); 
           setCurrentUser(response.data);
         })
         .catch(error => {
           console.error('Error fetching user data:', error);
           setUser(null);  
+          setCurrentUser(null);
         })
         .finally(() => {
-          setLoading(false); // Loading finished
+          setLoading(false);
         });
     } else {
-      setLoading(false); // No token, loading finished
+      setLoading(false); 
     }
   }, []);
 
   // Function to logout
   const logout = () => {
-    Cookies.remove('session_token'); // Remove the cookie
-    setUser(null); // Clear user data
+    Cookies.remove('session_token');
+    setUser(null); 
+    setCurrentUser(null);
   };
 
   return (

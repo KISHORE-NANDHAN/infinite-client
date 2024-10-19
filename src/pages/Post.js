@@ -70,8 +70,8 @@ const Post = () => {
             <h2 className="text-xl font-semibold mb-4">Create a Post</h2>
             <form onSubmit={handleSubmit} onReset={() => setFile(null)} className="space-y-4">
                 <div className='place-items-center flex'>
-                    <img src={user.profilePicture || process.env.REACT_APP_DEFAULT_PFP } alt='profile pic' className="w-12 h-12 rounded-full"/>
-                    <span className="ml-2 text-gray-700 font-medium">{user.username}</span>
+                    <img src={user.profilePicture || 'https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/default-profile.png?alt=media&token=e91050e8-f98e-42d8-9265-be2660bba412' } alt='profile pic' className="w-12 h-12 rounded-full"/>
+                    <span className="ml-2 text-gray-700 font-medium">{user.username || 'infinite_user'}</span>
                 </div>
 
                 <div

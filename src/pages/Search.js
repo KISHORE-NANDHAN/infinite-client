@@ -18,7 +18,7 @@ function Search() {
       setLoading(true); // Start loading
       try {
         const response = await axios.get('http://localhost:3500/getUsers', {
-          params: { q: searchValue } // Send the search query as a parameter
+          params: { q: searchValue } 
         });
         setUsers(response.data); // Set the fetched users
       } catch (error) {

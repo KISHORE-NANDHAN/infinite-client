@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons'; 
+import { faTrash, faCheck } from '@fortawesome/free-solid-svg-icons'; 
 import Cookies from 'js-cookie';
 
 function Notifications() {
@@ -62,10 +62,9 @@ function Notifications() {
         {notifications.map((notification) => (
           <div
             key={notification._id}
-            className={`flex items-center p-4 shadow-md rounded-lg cursor-pointer transition duration-300 ease-in-out 
+            className={`flex items-center p-4 shadow-md rounded-lg transition duration-300 ease-in-out 
               ${notification.isRead ? 'bg-gray-100' : 'bg-white'} 
               hover:opacity-90`}
-            onClick={() => !notification.isRead && markAsRead(notification._id)} // Mark as read on click
           >
             <div className="w-12 h-12">
               <img
@@ -96,10 +95,23 @@ function Notifications() {
               <p className="text-xs text-gray-500 mt-2">{new Date(notification.createdAt).toLocaleString()}</p>
             </div>
 
+            {/* Mark as Read button */}
+            {!notification.isRead && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering parent click event
+                  markAsRead(notification._id);
+                }}
+                className="ml-4 text-green-500 hover:text-green-700 transition-colors duration-200"
+              >
+                <FontAwesomeIcon icon={faCheck} size="lg" />
+              </button>
+            )}
+
             {/* Delete button */}
             <button
               onClick={(e) => {
-                e.stopPropagation(); // Prevent marking as read when clicking delete
+                e.stopPropagation(); // Prevent triggering parent click event
                 deleteNotification(notification._id);
               }}
               className="ml-4 text-red-500 hover:text-red-700 transition-colors duration-200"

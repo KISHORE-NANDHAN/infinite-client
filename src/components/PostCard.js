@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Toast from '../components/Toast'
+import { UserContext } from "../context/UserContext";
 
 const PostCard = ({ post }) => {
   const [likeCount, setLikeCount] = useState(post.likes.length);
@@ -17,10 +18,8 @@ const PostCard = ({ post }) => {
   const popupRef = useRef();
   const dropdownRef = useRef();
 
-  // Get the session token from cookies (representing the current logged-in user)
   const currentUserId = Cookies.get('session_token');
-
-  // Fetch user details based on post.user (userId)
+  const { user } = useContext(UserContext);
   useEffect(() => {
     if (post.user) {
       const fetchUserDetails = async () => {
@@ -91,9 +90,9 @@ const PostCard = ({ post }) => {
     e.preventDefault();
     try {
         const response = await axios.post(`http://localhost:3500/api/posts/${post._id}/comment`, {
-            pfp: userDetails.profilePicture || process.env.REACT_APP_DEFAULT_PFP,
+            pfp: user.profilePicture || process.env.REACT_APP_DEFAULT_PFP,
             userId: currentUserId,
-            username: userDetails?.username || 'Infinite_User',
+            username: user.username || 'Infinite_User',
             text: comment
         });
         setComments(response.data.comments);// Update the comments list
@@ -113,9 +112,9 @@ const sendLikeNotification = () => {
   axios
     .post(`http://localhost:3500/api/notifications`, {
       type: 'like',
-      actionUserId: currentUserId,  // The user who liked
-      userId: post.user,  // The user who owns the post
-      postId: post._id  // The post that was liked, passing the post ID here
+      actionUserId: currentUserId,  
+      userId: post.user, 
+      postId: post._id  
     })
     .then(() => {
       console.log('Like notification sent successfully');
@@ -169,7 +168,6 @@ const toggleFollow = async () => {
       setToastMessage(`You have successfully followed ${userDetails.username}`);
       setToastType('success');
 
-      // Send follow notification as a promise
       sendFollowNotification()
         .then(() => {
           console.log('Notification sent successfully');
@@ -206,7 +204,8 @@ const toggleFollow = async () => {
             className="profile-pic w-8 h-8 rounded-full"
           />
           <div className="ml-2">
-            <div className="username font-bold">{userDetails?.username || 'Loading...'}</div>
+            <a href={`/app/OthersProfile/${post.user}`}>
+            <div className="username font-bold">{userDetails?.username || 'Loading...'}</div></a>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -275,6 +274,7 @@ const toggleFollow = async () => {
                   alt="Profile"
                   className="w-8 h-8 bg-gray-300 rounded-full"
                 />
+                
                 <div className="ml-2">
                   <div className="username font-bold">{userDetails.username || 'Anonymous'}</div>
                 </div>
@@ -297,8 +297,15 @@ const toggleFollow = async () => {
               <h3 className="text-lg font-semibold mb-2">Comments</h3>
               <div className="comments max-h-60 overflow-y-auto mb-4">
                 {comments.map((comment, index) => (
-                  <div key={index} className="comment py-2 border-b border-gray-200">
-                    <strong>{comment.username}</strong>: {comment.text}
+                  <div key={index} className="comment py-2 border-b border-gray-200 flex items-center">
+                    <img 
+                        src={comment.pfp} 
+                        alt="Profile" 
+                        className="w-8 h-8 bg-gray-300 rounded-full" 
+                        />
+                        <div className="ml-2">
+                        <strong>{comment.username || 'Anonymous'}</strong>: {comment.text}
+                  </div>
                   </div>
                 ))}
               </div>
