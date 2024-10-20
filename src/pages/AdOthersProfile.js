@@ -112,7 +112,7 @@ function AdOthersProfile() {
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {posts.map((post) => (
-              <Card key={post._id} post={post} user={user} /> // Pass user data as prop
+              <DeleteCard key={post._id} post={post} user={user} /> // Pass user data as prop
             ))}
           </div>
         ) : (

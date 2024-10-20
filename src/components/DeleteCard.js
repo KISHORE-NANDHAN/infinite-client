@@ -10,6 +10,7 @@ function DeleteCard({ post, user, onDelete }) {
     const [isLiked, setIsLiked] = useState(false);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState(post.comments || []);
+    const [showDeleteMenu, setShowDeleteMenu] = useState(false); // State to track delete menu visibility
     const popupRef = useRef();
     const currentUserId = Cookies.get('session_token');
 
@@ -114,25 +115,25 @@ function DeleteCard({ post, user, onDelete }) {
                                     <div className="username font-bold">{user.username || 'Anonymous'}</div>
                                 </div>
                                 <div className="ml-2 flex-grow">
-                            <div className="absolute ">
-                                <button 
-                                    onClick={() => setShowDeleteMenu(!showDeleteMenu)}
-                                    className="text-gray-500 focus:outline-none"
-                                >
-                                    &#x22EE;
-                                </button>
-                                {showDeleteMenu && (
-                                    <div className="absolute right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                    <div className="absolute ">
                                         <button 
-                                            onClick={handleDeletePost}
-                                            className="block px-4 py-2 text-red-600 hover:bg-gray-100 w-full text-left"
+                                            onClick={() => setShowDeleteMenu(!showDeleteMenu)}
+                                            className="text-gray-500 focus:outline-none"
                                         >
-                                            Delete Post
+                                            &#x22EE;
                                         </button>
+                                        {showDeleteMenu && (
+                                            <div className="absolute right-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                                <button 
+                                                    onClick={handleDeletePost}
+                                                    className="block px-4 py-2 text-red-600 hover:bg-gray-100 w-full text-left"
+                                                >
+                                                    Delete Post
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        </div>
+                                </div>
                             </div>
                             <img
                                 src={post.image}

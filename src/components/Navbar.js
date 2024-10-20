@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faSearch, faPlusSquare, faUserAlt, faBars, faBell } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faSearch, faPlusSquare, faUserAlt, faBars, faBell, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { DarkModeContext } from '../context/DarkModeContext'; // Import the context
 
 function Navbar() {
@@ -41,6 +41,12 @@ function Navbar() {
             <Link to="/app/post" className="flex items-center space-x-2">
               <FontAwesomeIcon icon={faPlusSquare} className="text-xl" />
               <span className="hidden sm:block">Post</span>
+            </Link>
+          </li>
+          <li className="flex items-center justify-center space-x-3">
+            <Link to="/app/chats" className="flex items-center space-x-2">
+              <FontAwesomeIcon icon={faMessage} className="text-xl" />
+              <span className="hidden sm:block">Chats</span>
             </Link>
           </li>
           <li className="flex items-center justify-center space-x-3">
