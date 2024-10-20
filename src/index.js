@@ -12,6 +12,8 @@ import Bot from './Bot.js'
 import Logout from './pages/Logout.js'
 import AboutUs from './pages/AboutUs.js'
 import { DarkModeProvider } from './context/DarkModeContext.js';
+import AdminPanel from './pages/AdminPanel.js';
+import OthersProfile from './pages/OthersProfile.js';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -30,6 +32,8 @@ root.render(
                 <Route path="/logout" element={<Logout />} />
                 <Route path="/bot" element={<Bot />} />
                 <Route path="/aboutus" element={<AboutUs />} />
+                <Route path="/AdminPanel" element={<AdminPanel />} />
+                <Route path="/AdOthersProfile/:id" element={<OthersProfile/>}/>
                 <Route path="*" element={<NotFound />} /> 
               </Routes>
             </Router>

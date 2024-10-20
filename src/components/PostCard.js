@@ -17,6 +17,8 @@ const PostCard = ({ post }) => {
   const [toastType, setToastType] = useState('success');
   const popupRef = useRef();
   const dropdownRef = useRef();
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState('');
 
   const currentUserId = Cookies.get('session_token');
   const { user } = useContext(UserContext);
@@ -26,7 +28,7 @@ const PostCard = ({ post }) => {
         try {
           const response = await axios.get(`http://localhost:3500/api/users/${post.user}`);
           setUserDetails(response.data);
-          setIsFollowing(response.data.followers.includes(currentUserId));  // Set follow state
+          setIsFollowing(response.data.followers.includes(currentUserId));
         } catch (error) {
           console.error("Failed to fetch user details:", error);
         }
@@ -38,7 +40,7 @@ const PostCard = ({ post }) => {
   // Toast visibility effect
   useEffect(() => {
     if (toastMessage) {
-      const timer = setTimeout(() => setToastMessage(''), 3000); // Clear toast after 3 seconds
+      const timer = setTimeout(() => setToastMessage(''), 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
@@ -107,6 +109,34 @@ const PostCard = ({ post }) => {
     } catch (error) {
         console.error('Failed to comment on post:', error);
     }
+};
+const handleEditComment = (commentId, currentText) => {
+  setEditCommentId(commentId); // Set the comment to be edited
+  setEditCommentText(currentText); // Prefill the current comment text
+};
+
+const handleEditCommentSubmit = async (commentId) => {
+  try {
+    const response = await axios.put(`http://localhost:3500/api/posts/${post._id}/comment/${commentId}`, {
+      text: editCommentText,
+      userId: currentUserId,
+    });
+    setComments(response.data.comments); // Update comments with the edited version
+    setEditCommentId(null); // Reset the editing state
+  } catch (error) {
+    console.error('Failed to edit comment:', error);
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  try {
+    const response = await axios.delete(`http://localhost:3500/api/posts/${post._id}/comment/${commentId}`, {
+      data: { userId: currentUserId },
+    });
+    setComments(response.data.comments); // Update comments after deletion
+  } catch (error) {
+    console.error('Failed to delete comment:', error);
+  }
 };
 const sendLikeNotification = () => {
   axios
@@ -294,40 +324,86 @@ const toggleFollow = async () => {
 
             {/* Comment Section */}
             <div className="w-1/2 pl-6">
-              <h3 className="text-lg font-semibold mb-2">Comments</h3>
-              <div className="comments max-h-60 overflow-y-auto mb-4">
-                {comments.map((comment, index) => (
-                  <div key={index} className="comment py-2 border-b border-gray-200 flex items-center">
-                    <img 
-                        src={comment.pfp} 
-                        alt="Profile" 
-                        className="w-8 h-8 bg-gray-300 rounded-full" 
-                        />
-                        <div className="ml-2">
-                        <strong>{comment.username || 'Anonymous'}</strong>: {comment.text}
-                  </div>
-                  </div>
-                ))}
+        <h3 className="text-lg font-semibold mb-2">Comments</h3>
+        <div className="comments max-h-60 overflow-y-auto mb-4">
+          {comments.map((comment, index) => (
+            <div key={index} className="comment-item py-2 flex items-start">
+            <img
+              src={comment.pfp || '/default-profile.png'}
+              alt="Commenter"
+              className="w-6 h-6 rounded-full mr-2"
+            />
+            <div className="comment-content">
+              <div className="flex items-center">
+                <span className="font-semibold mr-2">{comment.username}</span>
+                <span className="text-xs text-gray-400">{new Date(comment.time).toLocaleString()}</span>
               </div>
-              <form onSubmit={handleCommentSubmit} className="flex">
-                <input
-                  type="text"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="flex-grow border border-gray-300 rounded-lg p-2 mr-2"
-                  placeholder="Add a comment..."
-                />
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">Post</button>
-              </form>
+              {editCommentId === comment._id ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    className="w-full px-2 py-1 border rounded"
+                    value={editCommentText}
+                    onChange={(e) => setEditCommentText(e.target.value)}
+                  />
+                  <button
+                    onClick={() => handleEditCommentSubmit(comment._id)}
+                    className="text-blue-500 text-sm"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditCommentId(null)}
+                    className="text-gray-500 text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm">{comment.text}</p>
+              )}
+              {currentUserId === comment.userId && (
+                <div className="flex items-center space-x-2 mt-1 text-xs">
+                  <button
+                    onClick={() => handleEditComment(comment._id, comment.text)}
+                    className="text-blue-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteComment(comment._id)}
+                    className="text-red-500"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
-
-            {/* Close Button */}
-            <button onClick={() => setIsCommentPopupOpen(false)} className="absolute top-2 right-2 text-xl text-gray-600">✖</button>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+      <form onSubmit={handleCommentSubmit} className="flex items-center space-x-2">
+        <input
+          type="text"
+          className="w-full px-3 py-1 border rounded-lg"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Add a comment..."
+          required
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-1 rounded-lg"
+        >
+          Post
+        </button>
+      </form>
     </div>
-  );
+  </div>
+</div>
+)}
+</div>
+);
 };
 
 export default PostCard;

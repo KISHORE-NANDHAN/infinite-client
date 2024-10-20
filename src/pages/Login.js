@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import Toast from '../components/Toast'; // Import Toast component
 
 function Login() {
   const [data, setData] = useState({
@@ -12,6 +13,8 @@ function Login() {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null); 
+  const [toastType, setToastType] = useState('success'); 
 
   const navigate = useNavigate();
 
@@ -38,22 +41,31 @@ function Login() {
     axios.post('http://localhost:3500/auth/login', data)
       .then(response => {
         console.log('User logged in:', response.data);
-        
+
         if (response.status === 200) {
-         
-          Cookies.set('session_token',response.data.user.Id);
+          Cookies.set('session_token', response.data.user.Id);
           console.log(Cookies.get('session_token'));
-          alert('User logged in successfully');
-          navigate('/app/home');
+
+          if (data.email === 'Admin@gmail.com' && data.password === 'Admin@1234') {
+            setToastMessage('Admin logged in successfully');
+            setToastType('success');
+            navigate('/AdminPanel');
+          } else {
+            setToastMessage('User logged in successfully');
+            setToastType('success');
+            navigate('/app/home');
+          }
         }
       })
       .catch(error => {
         if (error.response) {
           const errorMessage = error.response.data.message;
-          alert(`Error: ${errorMessage}`);
+          setToastMessage(`Error: ${errorMessage}`);
+          setToastType('error');
         } else {
           console.error('Error logging in user:', error);
-          alert('An unexpected error occurred. Please try again later.');
+          setToastMessage('An unexpected error occurred. Please try again later.');
+          setToastType('error');
         }
       });
   };
@@ -125,6 +137,8 @@ function Login() {
           </button>
         </div>
       </div>
+      {/* Render Toast Component */}
+      {toastMessage && <Toast message={toastMessage} type={toastType} />}
     </div>
   );
 }

@@ -10,20 +10,36 @@ function Signup() {
     dob: '',
     gender: '',
     mobile: '',
-    password: ''
+    password: '',
+    country: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUser(prevState => ({
+
+    // For the date of birth, check for valid input
+    if (name === 'dob') {
+      // Check if the input is valid (YYYY-MM-DD format)
+      const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(value);
+      if (!isValidDate) {
+        return; // Prevent invalid date format
+      }
+    }
+
+    setUser((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
 
     if (name === 'password') {
@@ -31,8 +47,28 @@ function Signup() {
     }
   };
 
+  const handleCountryChange = (e) => {
+    const selectedCountry = e.target.value;
+    setUser((prevState) => ({
+      ...prevState,
+      country: selectedCountry,
+    }));
+  };
+
+  const handleDobBlur = () => {
+    const { dob } = user;
+    if (dob) {
+      const age = new Date().getFullYear() - new Date(dob).getFullYear();
+      if (age < 16) {
+        alert('You must be at least 16 years old to register');
+      } else if (age > 85) {
+        alert('You must be under 85 years old to register');
+      }
+    }
+  };
+
   const validateForm = () => {
-    const { username, dob, mobile, password } = user;
+    const { username, dob, mobile, password, confirmPassword } = user;
 
     // Username validation
     if (username.length < 5) {
@@ -40,15 +76,9 @@ function Signup() {
       return false;
     }
 
-    // Age validation (above 18 and below 85)
-    const age = new Date().getFullYear() - new Date(dob).getFullYear();
-    if (age < 18 || age > 85) {
-      alert('You must be at least 18 years old and below 85 years old to register');
-      return false;
-    }
-
     // Mobile number validation (must be 10 digits)
-    if (mobile.length !== 10) {
+    const mobileNumber = mobile.replace(/^\D+/g, ''); // Remove non-digit characters
+    if (mobileNumber.length !== 10) {
       alert('Mobile number must be exactly 10 digits');
       return false;
     }
@@ -56,6 +86,12 @@ function Signup() {
     // Password validation
     if (!isValidPassword(password)) {
       alert('Password must be at least 8 characters long and contain at least one capital letter, one number, and one special symbol.');
+      return false;
+    }
+
+    // Confirm Password validation
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
       return false;
     }
 
@@ -78,7 +114,7 @@ function Signup() {
           console.log('User registered:', response.data);
           if (response.status === 201) {
             alert('User registered successfully');
-            window.location.href = '/';
+            window.location.href = '/'
           }
         })
         .catch(error => {
@@ -97,7 +133,7 @@ function Signup() {
     const hasUpperCase = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     const hasSpecialChar = /[@_]/.test(password);
-
+  
     if (password.length < 8) {
       return 'Very Weak';
     } else if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
@@ -112,12 +148,8 @@ function Signup() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen justify-center bg-white-100">
       <div className="flex flex-col w-full md:w-6/12 items-center bg-white p-8 rounded-lg shadow-lg">
-        <img
-          src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/logo.png?alt=media&token=da585e14-f4bd-4a00-ac98-cef73b6ccf54"
-          alt="Logo"
-          className="w-40 mb-4"
-        />
-        <h2 className="text-xl font-semibold mb-2">Create an Account</h2><br /><br />
+        <img src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/logo.png?alt=media&token=da585e14-f4bd-4a00-ac98-cef73b6ccf54" alt="Logo" className="w-40 mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Create an Account</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
           <div className="mb-4 w-full">
             <label className="block text-sm font-medium mb-1">Username:</label>
@@ -149,6 +181,7 @@ function Signup() {
               type="date"
               value={user.dob}
               onChange={handleChange}
+              onBlur={handleDobBlur} // Validate on blur
               className="w-full p-2 border border-gray-300 rounded"
               name="dob"
               required
@@ -170,10 +203,27 @@ function Signup() {
             </select>
           </div>
           <div className="mb-4 w-full">
+            <label className="block text-sm font-medium mb-1">Country:</label>
+            <select
+              value={user.country}
+              onChange={handleCountryChange}
+              className="w-full p-2 border border-gray-300 rounded"
+              name="country"
+              required
+            >
+              <option value="">Select Country</option>
+              <option value="USA">USA</option>
+              <option value="India">India</option>
+              <option value="UK">UK</option>
+              <option value="Canada">Canada</option>
+              {/* Add more countries as needed */}
+            </select>
+          </div>
+          <div className="mb-4 w-full">
             <label className="block text-sm font-medium mb-1">Mobile:</label>
             <input
               type="tel"
-              placeholder="1234567890"
+              placeholder="Enter mobile number"
               value={user.mobile}
               onChange={handleChange}
               onInput={(e) => {
@@ -203,9 +253,25 @@ function Signup() {
             >
               <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
             </span>
-            <p className={`text-sm mt-1 ${passwordStrength === 'Weak' ? 'text-red-500' : passwordStrength === 'Very Strong' ? 'text-green-500' : ''}`}>
-              {passwordStrength && `Password Strength: ${passwordStrength}`}
-            </p>
+            <p className="text-sm text-gray-500">Strength: {passwordStrength}</p>
+          </div>
+          <div className="mb-4 relative w-full">
+            <label className="block text-sm font-medium mb-1">Re-enter Password:</label>
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Re-enter password"
+              value={user.confirmPassword}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded"
+              name="confirmPassword"
+              required
+            />
+            <span
+              onClick={toggleConfirmPasswordVisibility}
+              className="cursor-pointer absolute right-3 top-11 transform -translate-y-1/2 text-gray-600"
+            >
+              <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+            </span>
           </div>
           <div className="col-span-2 text-center">
             <button
@@ -232,11 +298,7 @@ function Signup() {
         </div>
       </div>
       <div className="hidden md:block w-full md:w-6/12 h-max md:mt-0">
-        <img
-          src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/signup.png?alt=media&token=be905e98-9d11-4bcd-b3f9-cba04acf7f07"
-          className='mt-24'
-          alt="illustration for signup"
-        />
+        <img src="https://firebasestorage.googleapis.com/v0/b/infiniteconnect-19162.appspot.com/o/signup.png?alt=media&token=be905e98-9d11-4bcd-b3f9-cba04acf7f07" className='mt-24' alt="illustration for signup" />
       </div>
     </div>
   );
